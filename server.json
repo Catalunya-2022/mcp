@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "cat.2022/catalunya-2022",
+  "description": "Cerca de text complet al pla Catalunya 2022 - RESET: 3 àmbits, 12 objectius, 91 accions. CA/EN/ES.",
+  "title": "Catalunya 2022",
+  "repository": {
+    "url": "https://github.com/catalunya-2022/mcp",
+    "source": "github"
+  },
+  "version": "2.1.1",
+  "websiteUrl": "https://2022.cat",
+  "icons": [
+    { "src": "https://2022.cat/icon.svg", "mimeType": "image/svg+xml" },
+    { "src": "https://2022.cat/icons/icon-192.png", "mimeType": "image/png", "sizes": ["192x192"] },
+    { "src": "https://2022.cat/icons/icon-512.png", "mimeType": "image/png", "sizes": ["512x512"] }
+  ],
+  "remotes": [
+    { "type": "streamable-http", "url": "https://mcp.2022.cat" }
+  ]
+}

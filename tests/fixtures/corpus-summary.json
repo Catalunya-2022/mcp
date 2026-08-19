@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "title": "Catalunya 2022 - RESET: Crida per reactivar el país",
+    "date": "2021",
+    "languages": [
+      "ca",
+      "en",
+      "es"
+    ],
+    "structure": {
+      "spheres": 3,
+      "goals": 12,
+      "actions": 91,
+      "contributors": 30
+    }
+  },
+  "counts": {
+    "sections": 109,
+    "contributors": 30
+  },
+  "staticPages": [
+    "introduction",
+    "executive-summary",
+    "train-of-prosperity"
+  ]
+}

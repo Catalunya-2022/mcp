@@ -1,0 +1,79 @@
+name: Deploy MCP Server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never run two deploys at once: they would race on the same rsync target
+# and pm2 reload. Queued runs wait instead of cancelling a deploy midway.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    # Deploys run only where the DEPLOY_ENABLED repository variable is set:
+    # mirrors and forks have no droplet secrets, and a push there must not
+    # produce a red deploy run.
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - run: npm ci && npm run verify
+
+      - name: Validate build output
+        run: |
+          test -f dist/src/index.js || exit 1
+          test -f data/corpus.json || exit 1
+
+      # Third-party actions below receive the SSH deploy key, so they are
+      # pinned to commit SHAs rather than mutable tags.
+      - name: Deploy built artifacts via rsync
+        uses: burnett01/rsync-deployments@4d419d1dc46d4a8a2b6ceab2f951f0f93b2da8f5 # 9.0.0
+        with:
+          switches: -avzr --delete --exclude='.git' --exclude='node_modules' --exclude='.env' --exclude='content' --exclude='docs' --exclude='scripts' --exclude='tests'
+          path: ./
+          remote_path: /home/deploy/apps/catalunya2022-mcp/
+          remote_host: ${{ secrets.DROPLET_IP }}
+          remote_user: deploy
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Install deps and reload on server
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/deploy/apps/catalunya2022-mcp
+            npm ci --omit=dev
+            pm2 reload ecosystem.config.cjs --only mcp-server
+            pm2 save
+            # The gate must prove the NEW build is live, not merely that
+            # something answers: compare version and contentHash against the
+            # tree this run just rsynced.
+            for attempt in 1 2 3 4 5; do
+              if curl --fail --silent http://127.0.0.1:3001/health > /tmp/mcp-health.json; then
+                node -e "
+                  const health = require('/tmp/mcp-health.json');
+                  const pkg = require('./package.json');
+                  const corpus = require('./data/corpus.json');
+                  if (health.version !== pkg.version) throw new Error('stale version: ' + health.version);
+                  if (health.contentHash !== corpus.contentHash) throw new Error('stale contentHash');
+                " && exit 0
+              fi
+              sleep 2
+            done
+            pm2 status mcp-server
+            exit 1

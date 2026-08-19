@@ -1,0 +1,47 @@
+{
+  "name": "catalunya2022-mcp",
+  "version": "2.1.1",
+  "description": "Servidor MCP per al document «Catalunya 2022 - RESET: Crida per reactivar el país»: 3 àmbits, 12 objectius i 91 accions en CA/EN/ES",
+  "license": "MIT",
+  "private": true,
+  "author": "Catalunya 2022 (https://2022.cat)",
+  "homepage": "https://2022.cat/mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/catalunya-2022/mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/catalunya-2022/mcp/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build-corpus && tsx src/index.ts",
+    "build": "npm run build-corpus && rm -rf dist && tsc",
+    "typecheck": "tsc --noEmit --noUnusedLocals --noUnusedParameters",
+    "test": "npm run build && node --test \"tests/**/*.test.js\"",
+    "verify": "npm run lint && npm run typecheck && npm run sync-check && npm run test",
+    "start": "node dist/src/index.js",
+    "build-corpus": "tsx scripts/build-corpus.ts",
+    "fixtures:update": "npm run build-corpus && tsx scripts/update-fixtures.ts",
+    "sync": "tsx scripts/sync-from-website.ts",
+    "sync-check": "tsx scripts/sync-from-website.ts --check",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "flexsearch": "^0.8.2",
+    "hono": "^4.13.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.9",
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
