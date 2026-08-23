@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "Si utilitzes aquest programari, cita'l com s'indica a continuació. / If you use this software, please cite it as below."
+title: "Servidor MCP de Catalunya 2022"
+type: software
+authors:
+  - name: "Grup de Treball Catalunya 2022"
+repository-code: "https://github.com/catalunya-2022/mcp"
+url: "https://2022.cat/mcp"
+license: MIT
+version: 2.1.1
+date-released: 2026-08-18
+references:
+  - type: report
+    title: "Catalunya 2022 - RESET: Crida per reactivar el país"
+    authors:
+      - name: "Grup de Treball Catalunya 2022"
+    year: 2021
+    doi: 10.5281/zenodo.19500831
+    license: CC-BY-4.0

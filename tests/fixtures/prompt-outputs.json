@@ -1,0 +1,35 @@
+{
+  "exploreDocumentEn": {
+    "messages": [
+      {
+        "role": "user",
+        "content": {
+          "type": "text",
+          "text": "Guide me through the policy document \"Catalunya 2022 - RESET: Crida per reactivar el país\".\n\n1. Call get_document_metadata with locale=\"en\" to see the full structure\n2. Provide a high-level overview of the 3 spheres and 12 goals\n3. Highlight the most impactful proposals across spheres\n4. Offer to search specific topics with search_document or drill into any section with get_section\n\nKeep the response organized and suggest next steps for deeper exploration."
+        }
+      }
+    ]
+  },
+  "summarizeSphere1En": {
+    "messages": [
+      {
+        "role": "user",
+        "content": {
+          "type": "text",
+          "text": "Summarize Sphere 1 of the Catalunya 2022 document.\n\n1. Call get_section with slug=\"sphere-1\" locale=\"en\" — the sphere overview\n2. Read the sphere's vision and key themes\n3. Call get_section with slug=\"sphere-1/goal-1\" locale=\"en\" — Goal 1\n4. Call get_section with slug=\"sphere-1/goal-2\" locale=\"en\" — Goal 2\n5. Call get_section with slug=\"sphere-1/goal-3\" locale=\"en\" — Goal 3\n6. Call get_section with slug=\"sphere-1/goal-4\" locale=\"en\" — Goal 4\n7. Call list_proposals with sphereId=1 locale=\"en\" — all actions in this sphere\n\nSynthesize into a comprehensive summary covering:\n- The sphere's overarching vision\n- Key themes across its goals\n- Notable action proposals\n- How the goals connect to each other"
+        }
+      }
+    ]
+  },
+  "analyzeProposal21En": {
+    "messages": [
+      {
+        "role": "user",
+        "content": {
+          "type": "text",
+          "text": "Analyze Action 2-1 from the Catalunya 2022 document.\n\n1. Call get_section with slug=\"sphere-1/goal-2/action-2-1\" locale=\"en\" — the action itself\n2. Call get_section with slug=\"sphere-1/goal-2\" locale=\"en\" — its parent goal for context\n3. Call get_section with slug=\"sphere-1\" locale=\"en\" — the sphere it belongs to\n\nProvide analysis covering:\n- Summary of what the action proposes\n- How it aligns with its parent goal's objectives\n- Key stakeholders involved\n- Feasibility considerations\n- Cross-references to related actions in other goals"
+        }
+      }
+    ]
+  }
+}
