@@ -6,7 +6,8 @@
  *   1. content/{ca,en,es}/**\/*.mdx      ← <website>/content/
  *   2. data/team-members.ts              ← <website>/src/lib/data/team-members.ts
  *      (transformed: the `@/i18n/routing` import becomes a local Trilingual type)
- *   3. data/content-provenance.json      ← source commit + sync timestamp
+ *   3. data/content-provenance.json      ← sha256 fingerprint of those website
+ *                                          files + sync date
  *
  * Modes:
  *   npm run sync         copy everything that drifted (and prune removed files)
@@ -14,7 +15,7 @@
  *                        the website repo is absent (CI has no sibling checkout)
  */
 
-import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { LOCALES } from "../data/types.js";
@@ -113,16 +114,40 @@ function applySync(websiteDir: string, drift: Drift[], teamMembers: string): voi
   }
 }
 
+/**
+ * Fingerprint the website files this script mirrors, read from the website
+ * repo itself (team-members.ts before its transform), so anyone with a
+ * checkout of the public website repo can recompute it. Every file feeds
+ * "<path>\0<byte length>\0<bytes>" into one sha256, in this order: for each
+ * locale (ca, en, es) its content/<locale>/**\/*.mdx files, then
+ * src/lib/data/team-members.ts. Paths are relative to the website repo root,
+ * use forward slashes, and are sorted by code unit after that normalization,
+ * so every platform computes the same value.
+ */
+function computeContentSha256(websiteDir: string): string {
+  const relativePaths = [
+    ...LOCALES.flatMap((locale) =>
+      listMdxFilesRelative(path.join(websiteDir, "content", locale))
+        .map((file) => ["content", locale, ...file.split(path.sep)].join("/"))
+        .sort(),
+    ),
+    "src/lib/data/team-members.ts",
+  ];
+
+  const hash = createHash("sha256");
+  for (const relativePath of relativePaths) {
+    const bytes = fs.readFileSync(path.join(websiteDir, ...relativePath.split("/")));
+    hash.update(`${relativePath}\0${bytes.length}\0`);
+    hash.update(bytes);
+  }
+  return hash.digest("hex");
+}
+
 /** The stable provenance facts (everything except syncedAt, which only changes when we write). */
 function computeProvenance(websiteDir: string, contentFiles: number) {
   return {
     source: CONTENT_SOURCE,
-    websiteCommit: execFileSync("git", ["-C", websiteDir, "rev-parse", "HEAD"], {
-      encoding: "utf-8",
-    }).trim(),
-    websiteCommitDate: execFileSync("git", ["-C", websiteDir, "log", "-1", "--format=%cs", "HEAD"], {
-      encoding: "utf-8",
-    }).trim(),
+    contentSha256: computeContentSha256(websiteDir),
     contentFiles,
   };
 }
@@ -138,8 +163,7 @@ function isProvenanceFresh(expected: ReturnType<typeof computeProvenance>): bool
   const stored = JSON.parse(fs.readFileSync(provenancePath(), "utf-8"));
   return (
     stored.source === expected.source &&
-    stored.websiteCommit === expected.websiteCommit &&
-    stored.websiteCommitDate === expected.websiteCommitDate &&
+    stored.contentSha256 === expected.contentSha256 &&
     stored.contentFiles === expected.contentFiles
   );
 }
@@ -158,9 +182,9 @@ function main(): void {
   }
 
   const { drift, contentFiles, teamMembers } = collectDrift(websiteDir);
-  // Checked independently of content drift: the website commit can advance
-  // without changing any mirrored byte, and the provenance record must not
-  // silently go stale when it does.
+  // Checked independently of drift: the stored record can be stale even when
+  // every mirrored byte matches (a hand edit, or a file in an older format).
+  // Website commits that touch no mirrored file leave it fresh by design.
   const expectedProvenance = computeProvenance(websiteDir, contentFiles);
   const provenanceFresh = isProvenanceFresh(expectedProvenance);
 
