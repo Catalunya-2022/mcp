@@ -214,7 +214,7 @@ export function buildCorpus(): ContentCorpus {
   for (const relativePath of englishPaths) {
     const slug = filePathToSlug(relativePath);
 
-    if (sections[slug]) {
+    if (Object.hasOwn(sections, slug)) {
       throw new Error(`Duplicate slug generated for ${relativePath}: ${slug}`);
     }
 

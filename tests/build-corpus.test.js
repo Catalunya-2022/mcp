@@ -36,8 +36,8 @@ test("deriveMetadata preserves section typing", () => {
 
 test("absolutifyLinks localizes internal links, passes assets through, rejects unknown pages", () => {
   assert.equal(
-    absolutifyLinks("[Task Force](/task-force/elies-campo)", "es", "es/example.mdx"),
-    "[Task Force](https://2022.cat/es/grupo-de-trabajo/elies-campo)",
+    absolutifyLinks("[Task Force](/task-force/member-slug)", "es", "es/example.mdx"),
+    "[Task Force](https://2022.cat/es/grupo-de-trabajo/member-slug)",
   );
   // A real website asset: must pass through WITHOUT a locale prefix
   // (/es/documents/... would 404).

@@ -46,18 +46,20 @@ const TEAM_PHOTO_BASE_URL = `${WEBSITE_ORIGIN}/team-photos`;
 
 /** Whether a canonical first path segment has a static-route translation. */
 export function hasStaticRoute(segment: string): boolean {
-  return segment in STATIC_ROUTES;
+  return Object.hasOwn(STATIC_ROUTES, segment);
 }
 
-// Reverse lookups, derived from the same tables so they cannot drift.
-const CANONICAL_STATIC_BY_LOCALIZED: Record<string, string> = Object.fromEntries(
+// Reverse lookups, derived from the same tables so they cannot drift. Maps
+// rather than plain objects: the keys looked up come from client input, and an
+// object would answer "constructor" or "__proto__" from its prototype.
+const CANONICAL_STATIC_BY_LOCALIZED = new Map<string, string>(
   Object.entries(STATIC_ROUTES).flatMap(([canonical, localized]) =>
-    Object.values(localized).map((slug) => [slug, canonical]),
+    Object.values(localized).map((slug) => [slug, canonical] as const),
   ),
 );
-const CANONICAL_PREFIX_BY_LOCALIZED: Record<string, string> = Object.fromEntries(
+const CANONICAL_PREFIX_BY_LOCALIZED = new Map<string, string>(
   Object.entries(SEGMENT_PREFIXES).flatMap(([canonical, localized]) =>
-    Object.values(localized).map((prefix) => [prefix, canonical]),
+    Object.values(localized).map((prefix) => [prefix, canonical] as const),
   ),
 );
 
@@ -68,7 +70,7 @@ const CANONICAL_PREFIX_BY_LOCALIZED: Record<string, string> = Object.fromEntries
  */
 export function toCanonicalSlug(path: string): string {
   const segments = path.split("/");
-  const canonicalFirst = CANONICAL_STATIC_BY_LOCALIZED[segments[0]];
+  const canonicalFirst = CANONICAL_STATIC_BY_LOCALIZED.get(segments[0]);
   if (canonicalFirst) {
     return [canonicalFirst, ...segments.slice(1)].join("/");
   }
@@ -77,7 +79,7 @@ export function toCanonicalSlug(path: string): string {
     .map((segment) =>
       segment.replace(
         /^([a-zà-ú]+)(-\d.*)$/,
-        (_, word, rest) => (CANONICAL_PREFIX_BY_LOCALIZED[word] ?? word) + rest,
+        (_, word, rest) => (CANONICAL_PREFIX_BY_LOCALIZED.get(word) ?? word) + rest,
       ),
     )
     .join("/");
@@ -96,7 +98,7 @@ export function buildTeamPhotoUrl<Filename extends string>(
  *
  * Examples:
  *   ("introduction", "es")           → "https://2022.cat/es/introduccion"
- *   ("task-force/elies-campo", "ca") → "https://2022.cat/grup-de-treball/elies-campo"
+ *   ("task-force/member-slug", "ca") → "https://2022.cat/grup-de-treball/member-slug"
  *   ("sphere-1/goal-2", "es")        → "https://2022.cat/es/ambito-1/objetivo-2"
  *   ("", "en")                       → "https://2022.cat/en"
  */
@@ -117,7 +119,7 @@ function translatePath(canonicalPath: string, locale: Locale): string {
   const segments = canonicalPath.split("/");
   const firstSegment = segments[0];
 
-  if (STATIC_ROUTES[firstSegment]) {
+  if (hasStaticRoute(firstSegment)) {
     // Translate the static slug, keep remaining segments as-is (e.g., member slugs)
     const translated = [STATIC_ROUTES[firstSegment][locale], ...segments.slice(1)];
     return translated.join("/");
