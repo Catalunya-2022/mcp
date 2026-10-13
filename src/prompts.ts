@@ -61,16 +61,16 @@ function getSummarizeSpherePrompt(sphereId: "1" | "2" | "3", locale: Locale): Pr
   const goalSteps = goalIds
     .map(
       (goalId, index) =>
-        `${index + 3}. Call get_section with slug="${goalSlug(normalizedSphereId, goalId)}" locale="${locale}" — Goal ${goalId}`,
+        `${index + 3}. Call get_section with slug="${goalSlug(normalizedSphereId, goalId)}" locale="${locale}" (Goal ${goalId})`,
     )
     .join("\n");
 
   return createPromptResult(`Summarize Sphere ${normalizedSphereId} of the Catalunya 2022 document.
 
-1. Call get_section with slug="${sphereSlug(normalizedSphereId)}" locale="${locale}" — the sphere overview
+1. Call get_section with slug="${sphereSlug(normalizedSphereId)}" locale="${locale}" (the sphere overview)
 2. Read the sphere's vision and key themes
 ${goalSteps}
-${goalIds.length + 3}. Call list_proposals with sphereId=${normalizedSphereId} locale="${locale}" — all actions in this sphere
+${goalIds.length + 3}. Call list_proposals with sphereId=${normalizedSphereId} locale="${locale}" (all actions in this sphere)
 
 Synthesize into a comprehensive summary covering:
 - The sphere's overarching vision
@@ -102,9 +102,9 @@ function getAnalyzeProposalPrompt(actionId: string, locale: Locale): PromptResul
 
   return createPromptResult(`Analyze Action ${actionId} from the Catalunya 2022 document.
 
-1. Call get_section with slug="${actionSlug(sphereId, parsedActionId.goalId, actionId)}" locale="${locale}" — the action itself
-2. Call get_section with slug="${goalSlug(sphereId, parsedActionId.goalId)}" locale="${locale}" — its parent goal for context
-3. Call get_section with slug="${sphereSlug(sphereId)}" locale="${locale}" — the sphere it belongs to
+1. Call get_section with slug="${actionSlug(sphereId, parsedActionId.goalId, actionId)}" locale="${locale}" (the action itself)
+2. Call get_section with slug="${goalSlug(sphereId, parsedActionId.goalId)}" locale="${locale}" (its parent goal, for context)
+3. Call get_section with slug="${sphereSlug(sphereId)}" locale="${locale}" (the sphere it belongs to)
 
 Provide analysis covering:
 - Summary of what the action proposes

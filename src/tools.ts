@@ -212,7 +212,7 @@ export function registerTools(server: McpServer): void {
           message =
             localesWithHits.length > 0
               ? `No results found for ${displayQuery} in ${locale}, but the query matches sections in: ${localesWithHits.join(", ")}. Retry with locale "${localesWithHits[0]}".`
-              : `No results found for ${displayQuery} in ${locale}. Try different keywords, a different locale (ca, en, es) — terms may appear in another language — or use list_proposals to browse all 91 actions.`;
+              : `No results found for ${displayQuery} in ${locale}. Try different keywords or a different locale (ca, en, es), as terms may appear in another language. You can also use list_proposals to browse all 91 actions.`;
         }
       }
 
