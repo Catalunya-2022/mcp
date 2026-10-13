@@ -331,6 +331,34 @@ test("a bare legacy tools/call round-trips over HTTP", async () => {
   });
 });
 
+test("wildcard or missing Accept headers are served; narrower ones still get 406", async () => {
+  // fetch, Python requests and aiohttp send */* by default; that accepts both
+  // media types the transport needs, so it must not be refused.
+  const send = (app, accept) => {
+    const headers = { "Content-Type": "application/json" };
+    if (accept !== undefined) {
+      headers.Accept = accept;
+    }
+    return app.request("/", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ jsonrpc: "2.0", id: 9, method: "tools/list" }),
+    });
+  };
+
+  await withApp(async (app) => {
+    for (const accept of ["*/*", undefined, "*/*;q=0.8"]) {
+      const response = await send(app, accept);
+      assert.equal(response.status, 200, `Accept: ${accept ?? "(none)"}`);
+      const payload = await readRpcJson(response);
+      assert.ok(payload.result.tools.length > 0);
+    }
+    for (const accept of ["application/json", "text/event-stream", "application/*"]) {
+      assert.equal((await send(app, accept)).status, 406, `Accept: ${accept}`);
+    }
+  });
+});
+
 test("a bare prompts/get without arguments falls back to the defaults", async () => {
   await withApp(async (app) => {
     const response = await app.request(

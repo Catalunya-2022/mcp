@@ -29,6 +29,9 @@ const MAX_BODY_BYTES = 100 * 1024;
 /** Methods the MCP endpoint (/) actually supports; advertised on every 405. */
 const ENDPOINT_ALLOW = "GET, POST, DELETE, OPTIONS";
 
+/** What the Streamable HTTP transport requires a POST to accept. */
+const MCP_ACCEPT = "application/json, text/event-stream";
+
 /**
  * RSS ceiling before /health reports "degraded". Memory bands: V8's old space
  * is capped at 80 MB (ecosystem node_args), so GC pressure keeps RSS
@@ -184,7 +187,7 @@ async function fetchToolList(mcp: { fetch: (request: Request) => Promise<Respons
   const response = await mcp.fetch(
     new Request(`${MCP_ENDPOINT_URL}/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream" },
+      headers: { "Content-Type": "application/json", Accept: MCP_ACCEPT },
       body: JSON.stringify({ jsonrpc: "2.0", id: 0, method: "tools/list" }),
     }),
   );
@@ -206,6 +209,22 @@ async function fetchToolList(mcp: { fetch: (request: Request) => Promise<Respons
     throw new Error("tools/list returned no tools");
   }
   return tools;
+}
+
+// A request with no Accept header, or one listing only */* (the default of
+// fetch, Python requests and aiohttp), accepts both media types the transport
+// needs, so spell them out instead of letting the SDK answer 406. Narrower
+// headers pass through untouched: a JSON-only client still gets 406, since
+// the legacy era can only answer with an event stream.
+function withExplicitAccept(request: Request): Request {
+  const accept = request.headers.get("accept")?.trim();
+  const wildcardOnly = !accept || accept.split(",").every((range) => range.split(";")[0].trim() === "*/*");
+  if (!wildcardOnly) {
+    return request;
+  }
+  const headers = new Headers(request.headers);
+  headers.set("Accept", MCP_ACCEPT);
+  return new Request(request, { headers });
 }
 
 export function createApp(serverFactory: McpServerFactory = createMcpServer, options: AppOptions = {}) {
@@ -316,7 +335,7 @@ export function createApp(serverFactory: McpServerFactory = createMcpServer, opt
       maxSize: MAX_BODY_BYTES,
       onError: (c) => c.json({ error: "Payload too large" }, 413),
     }),
-    (c) => mcp.fetch(c.req.raw),
+    (c) => mcp.fetch(withExplicitAccept(c.req.raw)),
   );
 
   // Legacy-era session DELETE: the stateless posture answers it (405 per spec,
