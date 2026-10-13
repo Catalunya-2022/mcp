@@ -83,12 +83,18 @@ test("queries that occur nowhere return no results instead of encoder noise", ()
 test("Catalan ela geminada matches with or without the interpunct", () => {
   const native = find("intel·ligencia", "ca", undefined);
   const joined = find("intelligencia", "ca", undefined);
+  const shouted = find("INTELLIGENCIA", "ca", undefined);
 
   assert.ok(native.length > 0, "native spelling should match");
   assert.ok(joined.length > 0, "keyboard-less 'll' spelling should match too");
   assert.deepEqual(
     joined.map((result) => result.slug),
     native.map((result) => result.slug),
+  );
+  assert.deepEqual(
+    shouted.map((result) => result.slug),
+    native.map((result) => result.slug),
+    "an uppercase 'LL' must retry with the geminate restored as well",
   );
 });
 

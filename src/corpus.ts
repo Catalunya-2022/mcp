@@ -147,9 +147,14 @@ export function search(
   // Catalan ela geminada: without a Catalan keyboard, "l·l" is typed "ll"
   // ("intelligencia" for "intel·ligència"), but the interpunct is a token
   // separator at index time, so the joined spelling matches nothing. Retry a
-  // zero-hit query with the geminate restored.
-  if (cleanedQuery.includes("ll") && fieldResults.every((fieldResult) => fieldResult.result.length === 0)) {
-    fieldResults = runQuery(cleanedQuery.replaceAll("ll", "l·l"));
+  // zero-hit query with the geminate restored, case-insensitively so that
+  // "INTELLIGENCIA" retries too (the encoder lowercases the query anyway).
+  const lowercasedQuery = cleanedQuery.toLowerCase();
+  if (
+    lowercasedQuery.includes("ll") &&
+    fieldResults.every((fieldResult) => fieldResult.result.length === 0)
+  ) {
+    fieldResults = runQuery(lowercasedQuery.replaceAll("ll", "l·l"));
   }
 
   // Deduplicate across fields; title-field results enter first and stable
