@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { getHeapStatistics } from "node:v8";
@@ -95,10 +96,20 @@ const GLAMA_CONNECTOR = {
   maintainers: [{ email: "info@2022.cat" }],
 } as const;
 
+/** Default policy: nothing this server returns needs to load or run anything. */
+const CONTENT_SECURITY_POLICY = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'";
+
+// The landing page's one stylesheet, admitted by hash: under the default
+// policy an inline style attribute is blocked and the page renders unstyled.
+const LANDING_STYLE =
+  "body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 4rem auto; padding: 0 1rem; }";
+const LANDING_STYLE_HASH = createHash("sha256").update(LANDING_STYLE).digest("base64");
+const LANDING_CONTENT_SECURITY_POLICY = `default-src 'none'; style-src 'sha256-${LANDING_STYLE_HASH}'; frame-ancestors 'none'; base-uri 'none'`;
+
 const LANDING_HTML = `<!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${SERVER_NAME} MCP server</title></head>
-<body style="font-family: system-ui, sans-serif; max-width: 40rem; margin: 4rem auto; padding: 0 1rem;">
+<head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${SERVER_NAME} MCP server</title><style>${LANDING_STYLE}</style></head>
+<body>
 <h1>Catalunya 2022 MCP server</h1>
 <p>This is a Model Context Protocol endpoint, not a website. Point an MCP client at
 <code>${MCP_ENDPOINT_URL}/</code> (Streamable HTTP, no authentication).</p>
@@ -141,7 +152,11 @@ function setSharedHeaders(c: Context): void {
   c.header("X-Content-Type-Options", "nosniff");
   c.header("X-Frame-Options", "DENY");
   c.header("Referrer-Policy", "no-referrer");
-  c.header("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  // A route that needs more than the default policy (the landing page) sets
+  // its own; every other response gets the default.
+  if (!c.res.headers.has("Content-Security-Policy")) {
+    c.header("Content-Security-Policy", CONTENT_SECURITY_POLICY);
+  }
   // Keep this host out of search results (the searchable face is DOCS_URL);
   // noindex only governs search listings, so AI crawlers still read freely.
   c.header("X-Robots-Tag", "noindex");
@@ -323,6 +338,7 @@ export function createApp(serverFactory: McpServerFactory = createMcpServer, opt
     // instead of redirecting cross-host, which some clients treated as the
     // MCP endpoint moving.
     c.header("Cache-Control", `public, max-age=${ONE_DAY_SECONDS}`);
+    c.header("Content-Security-Policy", LANDING_CONTENT_SECURITY_POLICY);
     return c.html(LANDING_HTML);
   });
 

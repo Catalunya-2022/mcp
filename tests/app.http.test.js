@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import { createApp } from "../dist/src/app.js";
 import { getCorpus } from "../dist/src/corpus.js";
@@ -50,6 +51,24 @@ test("root GET serves a landing page on this host, never a cross-host redirect",
     assert.match(html, /<meta name="robots" content="noindex">/);
     assert.equal(response.headers.get("cache-control"), "public, max-age=86400");
     assert.equal(response.headers.get("vary"), "Accept");
+  });
+});
+
+test("the landing page's stylesheet is admitted by its CSP hash, nothing else is", async () => {
+  await withApp(async (app) => {
+    const response = await app.request("/");
+    const html = await response.text();
+
+    // The default policy blocks inline style attributes, so the styling must
+    // live in a <style> block whose exact hash the page's own policy allows.
+    assert.doesNotMatch(html, /\sstyle="/);
+    const style = html.match(/<style>([^<]*)<\/style>/)?.[1];
+    assert.ok(style, "Expected the landing page to carry a <style> block");
+    const styleHash = createHash("sha256").update(style).digest("base64");
+    assert.equal(
+      response.headers.get("content-security-policy"),
+      `default-src 'none'; style-src 'sha256-${styleHash}'; frame-ancestors 'none'; base-uri 'none'`,
+    );
   });
 });
 
