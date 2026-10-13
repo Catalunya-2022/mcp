@@ -24,8 +24,12 @@ test("the locale argument is optional everywhere and defaults to Catalan", async
     }
 
     const defaulted = await client.getPrompt({ name: "explore-document", arguments: {} });
+    const omitted = await client.getPrompt({ name: "explore-document" });
     const explicit = await client.getPrompt({ name: "explore-document", arguments: { locale: "ca" } });
     assert.deepEqual(normalizePromptResult(defaulted), normalizePromptResult(explicit));
+    // A prompt whose arguments are all optional may be requested with no
+    // `arguments` at all (SDK 2.0.0 rejected that as "Invalid arguments").
+    assert.deepEqual(normalizePromptResult(omitted), normalizePromptResult(explicit));
   });
 });
 

@@ -305,6 +305,20 @@ test("a bare legacy tools/call round-trips over HTTP", async () => {
   });
 });
 
+test("a bare prompts/get without arguments falls back to the defaults", async () => {
+  await withApp(async (app) => {
+    const response = await app.request(
+      "/",
+      rpcRequest({ jsonrpc: "2.0", id: 8, method: "prompts/get", params: { name: "explore-document" } }),
+    );
+
+    assert.equal(response.status, 200);
+    const payload = await readRpcJson(response);
+    assert.equal(payload.error, undefined, JSON.stringify(payload.error));
+    assert.match(payload.result.messages[0].content.text, /locale="ca"/);
+  });
+});
+
 test("a server factory failure surfaces as a 500, not a hung request", async () => {
   await withApp(
     async (app) => {
