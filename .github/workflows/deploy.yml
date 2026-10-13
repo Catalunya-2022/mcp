@@ -58,11 +58,13 @@ jobs:
           script: |
             cd /home/deploy/apps/catalunya2022-mcp
             npm ci --omit=dev
+            export RELOAD_STARTED_AT=$(node -e 'console.log(Date.now())')
             pm2 reload ecosystem.config.cjs --only mcp-server
             pm2 save
             # The gate must prove the NEW build is live, not merely that
             # something answers: compare version and contentHash against the
-            # tree this run just rsynced.
+            # tree this run just rsynced, and require a process that started
+            # after this reload (a release may change neither of the two).
             for attempt in 1 2 3 4 5; do
               if curl --fail --silent http://127.0.0.1:3001/health > /tmp/mcp-health.json; then
                 node -e "
@@ -71,6 +73,9 @@ jobs:
                   const corpus = require('./data/corpus.json');
                   if (health.version !== pkg.version) throw new Error('stale version: ' + health.version);
                   if (health.contentHash !== corpus.contentHash) throw new Error('stale contentHash');
+                  if (!(Date.parse(health.startedAt) >= Number(process.env.RELOAD_STARTED_AT))) {
+                    throw new Error('process predates this reload: ' + health.startedAt);
+                  }
                 " && exit 0
               fi
               sleep 2

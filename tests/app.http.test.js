@@ -157,7 +157,7 @@ test("bodies over the 100kb limit return 413", async () => {
   });
 });
 
-test("health route reports status, rss, version, and the exact content build", async () => {
+test("health route reports status, rss, version, the exact content build, and process start", async () => {
   await withApp(async (app) => {
     const response = await app.request("/health");
 
@@ -168,6 +168,13 @@ test("health route reports status, rss, version, and the exact content build", a
     assert.equal(typeof body.heapLimitMB, "number");
     assert.equal(body.version, SERVER_VERSION);
     assert.equal(body.contentHash, getCorpus().contentHash);
+    // The deploy gate parses this to prove the reload produced a new process.
+    assert.equal(body.startedAt, new Date(Date.parse(body.startedAt)).toISOString());
+    assert.ok(Date.parse(body.startedAt) <= Date.now(), "startedAt must not lie in the future");
+    assert.ok(
+      Date.now() - Date.parse(body.startedAt) < 10 * 60_000,
+      "startedAt must be this process's start",
+    );
   });
 });
 

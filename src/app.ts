@@ -37,6 +37,13 @@ const ENDPOINT_ALLOW = "GET, POST, DELETE, OPTIONS";
  */
 const RSS_DEGRADED_MB = 150;
 
+/**
+ * When this process started. The deploy gate compares it with the moment the
+ * reload began: version and contentHash cannot tell a fresh process from a
+ * stale one when a release changes neither.
+ */
+const PROCESS_STARTED_AT = new Date(performance.timeOrigin).toISOString();
+
 /** Hostnames this server answers for; anything else gets 421 (DNS-rebinding guard). */
 const DEFAULT_ALLOWED_HOSTNAMES = [new URL(MCP_ENDPOINT_URL).hostname, "localhost", "127.0.0.1", "[::1]"];
 
@@ -254,6 +261,7 @@ export function createApp(serverFactory: McpServerFactory = createMcpServer, opt
       heapLimitMB: Math.round(getHeapStatistics().heap_size_limit / 1024 / 1024),
       version: SERVER_VERSION,
       contentHash: getCorpus().contentHash,
+      startedAt: PROCESS_STARTED_AT,
     });
   });
 
