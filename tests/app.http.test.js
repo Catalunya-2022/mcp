@@ -411,6 +411,7 @@ test("CORS and security headers are present on normal responses, not just OPTION
     assert.equal(response.headers.get("x-content-type-options"), "nosniff");
     assert.equal(response.headers.get("x-robots-tag"), "noindex");
     assert.equal(response.headers.get("referrer-policy"), "no-referrer");
+    assert.equal(response.headers.get("strict-transport-security"), "max-age=63072000; includeSubDomains");
     assert.equal(
       response.headers.get("content-security-policy"),
       "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",

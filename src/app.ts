@@ -24,6 +24,7 @@ type McpServerFactory = () => McpServer;
 
 const ONE_DAY_SECONDS = 86_400;
 const ONE_WEEK_SECONDS = 604_800;
+const TWO_YEARS_SECONDS = 63_072_000;
 const MAX_BODY_BYTES = 100 * 1024;
 
 /** Methods the MCP endpoint (/) actually supports; advertised on every 405. */
@@ -162,6 +163,8 @@ function setSharedHeaders(c: Context): void {
   c.header("X-Content-Type-Options", "nosniff");
   c.header("X-Frame-Options", "DENY");
   c.header("Referrer-Policy", "no-referrer");
+  // Browsers ignore it over plain HTTP, so local development is unaffected.
+  c.header("Strict-Transport-Security", `max-age=${TWO_YEARS_SECONDS}; includeSubDomains`);
   // A route that needs more than the default policy (the landing page) sets
   // its own; every other response gets the default.
   if (!c.res.headers.has("Content-Security-Policy")) {
