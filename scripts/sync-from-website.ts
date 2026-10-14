@@ -27,7 +27,7 @@ const WEBSITE_DIR_ENV = "CAT22_WEBSITE_DIR";
 /** Public identity of the content source recorded in the provenance file. */
 const CONTENT_SOURCE = "catalunya-2022/web";
 const TEAM_MEMBERS_IMPORT_LINE = 'import type { Trilingual } from "@/i18n/routing";';
-const TEAM_MEMBERS_LOCAL_HEADER = `// GENERATED FILE — synced from the website repo by scripts/sync-from-website.ts.
+const TEAM_MEMBERS_LOCAL_HEADER = `// GENERATED FILE: synced from the website repo by scripts/sync-from-website.ts.
 // Do not edit by hand: edit <website>/src/lib/data/team-members.ts and run \`npm run sync\`.
 export type Trilingual<T = string> = { ca: T; en: T; es: T };`;
 

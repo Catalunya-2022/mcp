@@ -1,4 +1,4 @@
-// GENERATED FILE — synced from the website repo by scripts/sync-from-website.ts.
+// GENERATED FILE: synced from the website repo by scripts/sync-from-website.ts.
 // Do not edit by hand: edit <website>/src/lib/data/team-members.ts and run `npm run sync`.
 export type Trilingual<T = string> = { ca: T; en: T; es: T };
 
