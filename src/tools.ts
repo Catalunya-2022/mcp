@@ -275,7 +275,7 @@ export function registerTools(server: McpServer): void {
     {
       title: "Document structure and citation",
       description:
-        'Get the complete structure of the policy document "Catalunya 2022 - RESET: Crida per reactivar el país": 3 spheres, 12 goals, 91 actions created by a 30-expert Catalonia Task Force. Returns the hierarchy with canonical slugs for navigation via get_section, plus the formal citation with DOI.',
+        'Get the complete structure of the policy document "Catalunya 2022 - RESET: Crida per reactivar el país": 3 spheres, 12 goals, 91 actions written by the Grup de Treball Catalunya 2022 (30 civil-society experts). Returns the hierarchy with canonical slugs for navigation via get_section, plus the formal citation with DOI.',
       inputSchema: z.object({
         locale: localeSchema,
       }),
