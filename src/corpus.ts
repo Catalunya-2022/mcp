@@ -58,7 +58,7 @@ function loadCorpusState(): CorpusState {
   const slugs = Object.keys(corpus.sections);
 
   // A parseable but wrong corpus (stale build, truncated write) must fail here,
-  // where boot and the deploy health gate catch it — not as blank sections at
+  // where boot and the deploy health gate catch it, not as blank sections at
   // request time.
   const expectedSlugs = buildExpectedSectionSlugs();
   if (!corpus.contentHash || [...slugs].sort().join("\n") !== [...expectedSlugs].sort().join("\n")) {
@@ -116,7 +116,7 @@ export function search(
   const { corpus, indexes, slugs } = getCorpusState();
   // FlexSearch's Document#search return type is untyped; FieldResult mirrors its runtime shape.
   // limit must cover the whole corpus: FlexSearch defaults to 100 per field, and the
-  // scope filter below runs on this pool — a smaller pool silently drops scoped matches.
+  // scope filter below runs on this pool; a smaller pool silently drops scoped matches.
   // No enrich/highlight: snippets are built from the original text below, both for
   // typographic fidelity (FlexSearch's highlighter reconstructs encoder-normalized
   // text, dropping the Catalan interpunct and wrapping token fragments mid-word)
@@ -547,7 +547,7 @@ export function renderSectionMarkdown(slug: string, url: string, content: Locali
 const fullDocumentCache = new Map<Locale, string>();
 
 /**
- * Render the whole document for one locale as a single markdown file — the
+ * Render the whole document for one locale as a single markdown file, in the
  * same shape as the website's /documents/catalunya-2022-{locale}.md downloads:
  * H1 document title, then per section `## identifier`, the website URL, the
  * `### title` subtitle, and the body, separated by `---` rules.

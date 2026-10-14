@@ -46,7 +46,7 @@ export type SectionMetadata =
   | Pick<ActionSection, "type" | "sphereId" | "goalId" | "actionId">;
 
 export type ContentCorpus = {
-  /** sha256 over sections + contributors — identifies the content build (echoed by /health). */
+  /** sha256 over sections + contributors: identifies the content build (echoed by /health). */
   contentHash: string;
   metadata: {
     title: string;

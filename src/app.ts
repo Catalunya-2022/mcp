@@ -56,8 +56,8 @@ const DEFAULT_ALLOWED_HOSTNAMES = [new URL(MCP_ENDPOINT_URL).hostname, "localhos
 // card is the ecosystem's hybrid shape: top-level name/version/description
 // where registry-shaped and ora-style scanners require them (they flag the
 // nested-only spelling as "missing fields"), serverUrl + remotes for endpoint
-// discovery, and the serverInfo/transport/capabilities block kept intact —
-// that is the Smithery-documented shape and its metadata-scan fallback.
+// discovery, and the serverInfo/transport/capabilities block kept intact
+// (the Smithery-documented shape and its metadata-scan fallback).
 const SERVER_CARD = {
   name: REGISTRY_NAME,
   title: DOCUMENT_TITLE,
@@ -176,7 +176,7 @@ function setSharedHeaders(c: Context): void {
 }
 
 type AppOptions = {
-  /** Override the per-IP rate limit — used by tests to exercise the 429 path with a tiny budget. */
+  /** Override the per-IP rate limit; used by tests to exercise the 429 path with a tiny budget. */
   rateLimit?: RateLimitOptions;
 };
 
@@ -233,8 +233,8 @@ function withExplicitAccept(request: Request): Request {
 export function createApp(serverFactory: McpServerFactory = createMcpServer, options: AppOptions = {}) {
   const app = new Hono();
   // Both protocol eras from one factory: modern (2026-07-28) natively, and
-  // 2025-era clients through the SDK's stateless legacy posture — the default,
-  // kept deliberately: ChatGPT, VS Code, Cursor, and the Claude API connector
+  // 2025-era clients through the SDK's stateless legacy posture (the default,
+  // kept deliberately): ChatGPT, VS Code, Cursor, and the Claude API connector
   // still speak the legacy era today, and rejecting them saves no code.
   const mcp = createMcpHandler(() => serverFactory(), { legacy: "stateless" });
 
@@ -278,7 +278,7 @@ export function createApp(serverFactory: McpServerFactory = createMcpServer, opt
     return c.json({
       status: rssMB > RSS_DEGRADED_MB ? "degraded" : "ok",
       rssMB,
-      // Effective V8 ceiling — proves whether the ecosystem node_args heap
+      // Effective V8 ceiling: proves whether the ecosystem node_args heap
       // budget is live on the running process (~92 with it, ~493 without).
       heapLimitMB: Math.round(getHeapStatistics().heap_size_limit / 1024 / 1024),
       version: SERVER_VERSION,

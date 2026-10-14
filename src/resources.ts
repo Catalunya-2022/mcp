@@ -33,7 +33,7 @@ function getManifestJson(): string {
 }
 
 // Entries carry their own name (programmatic ref), title (human), and, for the
-// full-document rows, description — fields an entry omits are inherited from
+// full-document rows, description. Fields an entry omits are inherited from
 // the template registration, whose generic title/description fit no single row.
 function getDocumentResourceList() {
   documentResourceList ??= [

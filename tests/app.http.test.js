@@ -6,7 +6,7 @@ import { getCorpus } from "../dist/src/corpus.js";
 import { SERVER_VERSION } from "../dist/src/identity.js";
 
 /**
- * Run a test body against a fresh app, always closing the MCP handler —
+ * Run a test body against a fresh app, always closing the MCP handler:
  * leaked handlers are how `node --test` hangs surface after an SDK bump.
  */
 async function withApp(run, serverFactory, options) {
@@ -421,7 +421,7 @@ test("CORS and security headers are present on normal responses, not just OPTION
 
 test("CORS, security, and rate-limit headers reach MCP endpoint responses too", async () => {
   // The MCP handler returns its own Response objects, which bypass headers
-  // set before next() — a browser client would pass preflight and then have
+  // set before next(), so a browser client would pass preflight and then have
   // the actual POST blocked. Pin that the shared headers survive that path.
   await withApp(async (app) => {
     const response = await app.request("/", rpcRequest({ jsonrpc: "2.0", id: 1, method: "tools/list" }));

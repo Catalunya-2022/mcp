@@ -30,7 +30,7 @@ const staticSectionOrder = new Map<string, number>(STATIC_SLUGS.map((slug, index
 
 /**
  * Parse "N-M" into goal and action number, validating only the format and
- * goal range — not whether action M exists. Callers that want a tailored
+ * goal range, not whether action M exists. Callers that want a tailored
  * out-of-range message (see analyze-proposal) check ACTION_COUNTS themselves.
  */
 export function parseActionIdFormat(actionId: string): ParsedActionId | undefined {
@@ -232,7 +232,7 @@ export function fullDocumentResourceUri(locale: Locale): string {
 /**
  * One resource entry per section per locale (109 × 3), in reading order.
  * `name` is the programmatic identifier (the URI ref); `title` carries the
- * human-readable section title — clients that display titles would otherwise
+ * human-readable section title; clients that display titles would otherwise
  * inherit the template's generic title on every entry.
  */
 export function buildSectionResourceList(corpus: ContentCorpus): Array<{

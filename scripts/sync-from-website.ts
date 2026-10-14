@@ -46,7 +46,7 @@ function transformTeamMembers(source: string): string {
   if (!source.includes(TEAM_MEMBERS_IMPORT_LINE)) {
     throw new Error(
       "team-members.ts transform failed: expected import line not found. " +
-        "The website module changed shape — update scripts/sync-from-website.ts.",
+        "The website module changed shape; update scripts/sync-from-website.ts.",
     );
   }
   return source.replace(TEAM_MEMBERS_IMPORT_LINE, TEAM_MEMBERS_LOCAL_HEADER);
@@ -194,7 +194,7 @@ function main(): void {
   }
 
   if (checkOnly) {
-    console.error(`Out of sync with the website repo — ${drift.length} file(s) drifted:`);
+    console.error(`Out of sync with the website repo: ${drift.length} file(s) drifted:`);
     for (const item of drift) {
       console.error(`  ${item.kind.padEnd(7)} ${item.path}`);
     }

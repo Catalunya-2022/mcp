@@ -5,7 +5,7 @@ module.exports = {
       script: "dist/src/index.js",
       cwd: "/home/deploy/apps/catalunya2022-mcp",
       // V8's default heap limit on this droplet is ~493 MB, far above the
-      // 180 MB max_memory_restart below — without a budget V8 feels no
+      // 180 MB max_memory_restart below. Without a budget V8 feels no
       // pressure, lets RSS drift upward, and PM2 recycles a healthy process.
       // Warm heap sits near 55 MB; 80 MB makes GC kick in early so RSS
       // plateaus with real headroom under both thresholds.

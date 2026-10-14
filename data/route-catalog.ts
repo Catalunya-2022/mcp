@@ -1,10 +1,10 @@
 /**
- * Route catalog — single source of truth for URL generation.
+ * Route catalog: single source of truth for URL generation.
  * Mirrors the companion website's route-catalog.ts and path-utils.ts.
  *
  * Two kinds of translations:
- * 1. SEGMENT_PREFIXES — word-level for hierarchy segments (sphere-N, goal-N, action-N-M)
- * 2. STATIC_ROUTES — whole-slug translations for non-hierarchy pages
+ * 1. SEGMENT_PREFIXES: word-level for hierarchy segments (sphere-N, goal-N, action-N-M)
+ * 2. STATIC_ROUTES: whole-slug translations for non-hierarchy pages
  */
 
 import type { Locale } from "./types.js";
@@ -21,7 +21,7 @@ const SEGMENT_PREFIXES: Record<string, Record<Locale, string>> = {
 // These include companion website pages referenced from the MDX body content, not only
 // sections served directly by the MCP server. build-corpus.ts uses them to localize links.
 // Some keys (organizations, people-consulted, press, resources) have no referencing link
-// in today's content — kept for parity with the website's catalog, since a content sync
+// in today's content; they are kept for parity with the website's catalog, since a content sync
 // may introduce links to them at any time.
 
 const STATIC_ROUTES: Record<string, Record<Locale, string>> = {
